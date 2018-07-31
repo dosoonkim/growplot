@@ -40,32 +40,50 @@ def process_excel(filename):
     for sample in samples:
         dfs.append(df_kinetic_total.loc[:,sample])
 
-    data_dfs = []
-    for sample_df, series in zip(dfs, series_names):
-        df = pd.DataFrame()
-        df['avg'] = sample_df.mean(axis=1)
-        df['std'] = sample_df.std(axis=1)
-        df['Hours'] = df_kinetic_total['hrs']
-        df['sample'] = series
-        data_dfs.append(df)
+    return dfs, df_kinetic_total
+    #data_dfs = []
+    #for sample_df, series in zip(dfs, series_names):
+    #    df = pd.DataFrame()
+    #    #df['avg'] = sample_df.mean(axis=1)
+    #    df['avg'] = sample_df#.mean(axis=1)
+    #    #df['std'] = sample_df.std(axis=1)
+    #    df['Hours'] = df_kinetic_total['hrs']
+    #    df['sample'] = series
+    #    data_dfs.append(df)
     
-    return data_dfs
 
 if __name__ == '__main__':
-    dfs = process_excel(sys.argv[1])
+    dfs, t = process_excel(sys.argv[1])
 
     def f(x, L, k, x0):
         return L/(1+np.exp(-k*(x-x0)))
 
-    xdata = dfs[0]['Hours']
-    ydata = dfs[0]['avg']
+    #xdata = t['hrs']#
+    xdata = np.concatenate((t['hrs'], t['hrs']))
+    xdata = np.concatenate((xdata, t['hrs']))
+    xdata = np.concatenate((xdata, t['hrs']))
+    xdata = np.concatenate((xdata, t['hrs']))
+    xdata = np.concatenate((xdata, t['hrs']))
+
+    ydata = np.array(dfs[0])[:,0]
+    ydata = np.concatenate((ydata, np.array(dfs[0])[:,1]))
+    ydata = np.concatenate((ydata, np.array(dfs[0])[:,2]))
+    ydata = np.concatenate((ydata, np.array(dfs[0])[:,3]))
+    ydata = np.concatenate((ydata, np.array(dfs[0])[:,4]))
+    ydata = np.concatenate((ydata, np.array(dfs[0])[:,5]))
+    def av(l):
+        return sum(l)/len(l)
+    yav = np.array([av([np.array(dfs[0])[i,k] for k in range(6)]) for i in range(len(np.array(dfs[0])))]) 
+    #['avg']
     print(xdata)
     print(ydata)
     
     params, pcov = curve_fit(f, xdata, ydata)
     print(params)
-    plt.scatter(xdata, ydata)
-    plt.plot(xdata, f(xdata, *params), label="fit")
+    plt.scatter(xdata, ydata, alpha=0.3, s=4)
+    plt.scatter(t['hrs'], yav, alpha=0.8, s=4, c='black')
+    xdp = sorted(xdata)
+    plt.plot(xdp, f(xdp, *params), label="fit")
     plt.legend()
     plt.show()
 
