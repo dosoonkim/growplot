@@ -28,40 +28,30 @@ def process_excel(filename):
         
     df_kinetic_total['hrs'] = hrs_list
     df_kinetic_total['mins'] = min_list
- 
-    # TODO: read this in from the "layout" sheet or something.
-    #WT_samples = ['C3', 'D3', 'E3']
-    #sample_1 = ['C4', 'D4', 'E4', 'C5', 'D5', 'E5', 'C6', 'D6', 'E6']
-    #sample_2 = ['C7', 'D7', 'E7', 'C8', 'D8', 'E8', 'C9', 'D9', 'E9']
-    WT_samples = ['B3', 'C3', 'D3', 'E3', 'F3', 'G3']
-    sample_1 = ['B5', 'C5', 'D5', 'E5', 'F5', 'G5'] #6.1
-    sample_2 = ['B8', 'C8', 'D8', 'E8', 'F8', 'G8'] #8.0
     
-    WT_df = df_kinetic_total.loc[:,WT_samples]
-    sample_1_df = df_kinetic_total.loc[:, sample_1]
-    sample_2_df = df_kinetic_total.loc[:, sample_2]
-    
-    WT_df_avg = pd.DataFrame()
-    WT_df_avg['avg'] = WT_df.mean(axis=1)
-    WT_df_avg['std'] = WT_df.std(axis=1)
-    WT_df_avg['Hours'] = df_kinetic_total['hrs']
-    WT_df_avg['sample'] = 'WT'
-    
-    
-    sample_1_df_avg = pd.DataFrame()
-    sample_1_df_avg['avg'] = sample_1_df.mean(axis =1)
-    sample_1_df_avg['std'] = sample_1_df.std(axis=1)
-    sample_1_df_avg['Hours'] = df_kinetic_total['hrs']
-    sample_1_df_avg['sample'] ='D3_1'
-    
-    sample_2_df_avg = pd.DataFrame()
-    sample_2_df_avg['avg'] = sample_2_df.mean(axis=1)
-    sample_2_df_avg['std'] = sample_2_df.std(axis=1)
-    sample_2_df_avg['Hours'] = df_kinetic_total['hrs']
-    sample_2_df_avg['sample'] = 'D3_2'
-    
-    
-    data_dfs = [WT_df_avg, sample_1_df_avg, sample_2_df_avg]
+    df_samples = pd.read_excel(filename, sheet_name = 'Layout')
+    series_names = list(df_samples['Sample'])
+    df_samples.set_index('Sample', inplace=True)
+
+    quit()
+    samples = []
+    for series in series_names:
+        samples.append(df_samples.loc[series].tolist()[0].split(','))
+
+    dfs = []
+    for sample in samples:
+        dfs.append(df_kinetic_total.loc[:,sample])
+
+    data_dfs = []
+    for sample_df, sample in zip(dfs, samples):
+        df = pd.DataFrame()
+        df['avg'] = sample_df.mean(axis=1)
+        df['std'] = sample_df.std(axis=1)
+        df['Hours'] = df_kinetic_total['hrs']
+        df['sample'] = sample
+        data_dfs.append(df)
+
+    #data_dfs = [WT_df_avg, sample_1_df_avg, sample_2_df_avg, sample_3_df_avg, sample_4_df_avg, sample_5_df_avg]
     data_final = pd.concat(data_dfs)
     data_final['time'] = df_kinetic_total['hrs']
 
