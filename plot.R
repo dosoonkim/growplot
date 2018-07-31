@@ -2,7 +2,10 @@ library('ggplot2')
 library('ggthemes')
 library('RColorBrewer')
 
-data <- read.csv('growth_kinetic.csv', header=TRUE, sep=",")
+args <- commandArgs(trailingOnly = TRUE)
+filename <- args[1]
+   
+data <- read.csv(filename, header=TRUE, sep=",")
 
 plot <- ggplot(data, aes(x=time, y=avg,color=sample, group=sample)) +
         geom_errorbar(aes(ymin=avg-std, ymax=avg+std)) +
