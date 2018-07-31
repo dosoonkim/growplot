@@ -42,12 +42,12 @@ def process_excel(filename):
         dfs.append(df_kinetic_total.loc[:,sample])
 
     data_dfs = []
-    for sample_df, sample in zip(dfs, samples):
+    for sample_df, series in zip(dfs, series_names):
         df = pd.DataFrame()
         df['avg'] = sample_df.mean(axis=1)
         df['std'] = sample_df.std(axis=1)
         df['Hours'] = df_kinetic_total['hrs']
-        df['sample'] = sample
+        df['sample'] = series 
         data_dfs.append(df)
 
     #data_dfs = [WT_df_avg, sample_1_df_avg, sample_2_df_avg, sample_3_df_avg, sample_4_df_avg, sample_5_df_avg]
