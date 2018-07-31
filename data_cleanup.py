@@ -29,9 +29,12 @@ def process_excel(filename):
     df_kinetic_total['hrs'] = hrs_list
     df_kinetic_total['mins'] = min_list
     
-    WT_samples = ['C3', 'D3', 'E3']
-    sample_1 = ['C4', 'D4', 'E4', 'C5', 'D5', 'E5', 'C6', 'D6', 'E6']
-    sample_2 = ['C7', 'D7', 'E7', 'C8', 'D8', 'E8', 'C9', 'D9', 'E9']
+    df_samples = pd.read_excel('sample_data.xlsx', sheet_name = 'Layout')
+    df_samples.set_index('Sample', inplace=True)
+
+    WT_samples = df_samples.loc['WT'].tolist()[0].split(',')
+    sample_1 = df_samples.loc['sample1'].tolist()[0].split(',')
+    sample_2 = df_samples.loc['sample2'].tolist()[0].split(',')
     
     WT_df = df_kinetic_total.loc[:,WT_samples]
     sample_1_df = df_kinetic_total.loc[:, sample_1]
