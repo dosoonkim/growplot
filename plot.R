@@ -4,7 +4,7 @@ library('RColorBrewer')
 
 args <- commandArgs(trailingOnly = TRUE)
 filename <- args[1]
-   
+args[1]   
 data <- read.csv(filename, header=TRUE, sep=",")
 
 plot <- ggplot(data, aes(x=time, y=avg,color=sample, group=sample)) +

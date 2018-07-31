@@ -28,10 +28,14 @@ def process_excel(filename):
         
     df_kinetic_total['hrs'] = hrs_list
     df_kinetic_total['mins'] = min_list
-    
-    WT_samples = ['C3', 'D3', 'E3']
-    sample_1 = ['C4', 'D4', 'E4', 'C5', 'D5', 'E5', 'C6', 'D6', 'E6']
-    sample_2 = ['C7', 'D7', 'E7', 'C8', 'D8', 'E8', 'C9', 'D9', 'E9']
+ 
+    # TODO: read this in from the "layout" sheet or something.
+    #WT_samples = ['C3', 'D3', 'E3']
+    #sample_1 = ['C4', 'D4', 'E4', 'C5', 'D5', 'E5', 'C6', 'D6', 'E6']
+    #sample_2 = ['C7', 'D7', 'E7', 'C8', 'D8', 'E8', 'C9', 'D9', 'E9']
+    WT_samples = ['B3', 'C3', 'D3', 'E3', 'F3', 'G3']
+    sample_1 = ['B5', 'C5', 'D5', 'E5', 'F5', 'G5'] #6.1
+    sample_2 = ['B8', 'C8', 'D8', 'E8', 'F8', 'G8'] #8.0
     
     WT_df = df_kinetic_total.loc[:,WT_samples]
     sample_1_df = df_kinetic_total.loc[:, sample_1]
