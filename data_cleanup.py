@@ -33,7 +33,6 @@ def process_excel(filename):
     series_names = list(df_samples['Sample'])
     df_samples.set_index('Sample', inplace=True)
 
-    quit()
     samples = []
     for series in series_names:
         samples.append(df_samples.loc[series].tolist()[0].split(','))
