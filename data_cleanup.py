@@ -6,9 +6,12 @@ from math import log
 from scipy import stats
 
 import sys
+import argparse
 
-# sys.argv => filename
-def process_excel(filename):
+# We now use argparse -- positional arg is filename, then
+# --series for the names (i.e., AMW6) of the series to plot.
+
+def process_excel(filename, specified_series = []):
     df_kinetic_total = pd.read_excel(filename, sheet_name = 'Data')
 
     def get_hrs(time_str):
@@ -31,6 +34,9 @@ def process_excel(filename):
     
     df_samples = pd.read_excel(filename, sheet_name = 'Layout')
     series_names = list(df_samples['Sample'])
+    # filter series if any series to plot are specified
+    if len(specified_series) > 0:
+        series_names = [f for f in series_names if f in specified_series]
     df_samples.set_index('Sample', inplace=True)
 
     samples = []
@@ -57,4 +63,8 @@ def process_excel(filename):
     data_final.to_csv('growth_kinetic.csv')
 
 if __name__ == '__main__':
-    process_excel(sys.argv[1])
+    parser = argparse.ArgumentParser(description="Break down an Excel file into collections of data series for later plotting in R")
+    parser.add_argument('filename', type=str, nargs=1, help="The Excel file to be processed")
+    parser.add_argument('--series', type=str, nargs='+', help="The series from the Excel file, as named in the Layout tab, to be plotted")
+    args = parser.parse_args()
+    process_excel(filename=args.filename[0], specified_series=args.series)
