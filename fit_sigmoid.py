@@ -102,4 +102,6 @@ if __name__ == '__main__':
 
     plt.legend()
     plt.savefig('plot.png')
+    plt.rcParams['svg.fonttype']='none'
+    plt.savefig('plot.svg')
 
