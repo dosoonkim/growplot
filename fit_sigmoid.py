@@ -47,7 +47,7 @@ def process_excel(filename, specified_series):
     df_dict = {}
     for sample, series in zip(samples, series_names):
         if len(specified_series) > 0 and series in specified_series:
-            df_dict[series] = df_kinetic_total.loc[:,sample]
+            df_dict[series] = df_kinetic_total.loc[:,sample].astype(float)
 
     return df_dict, df_kinetic_total
     #data_dfs = []
@@ -72,24 +72,20 @@ if __name__ == '__main__':
     def f(x, L, k, x0):
         return L/(1+np.exp(-k*(x-x0)))
 
-    #xdata = t['hrs']#
-    xdata = np.concatenate((t['hrs'], t['hrs']))
-    xdata = np.concatenate((xdata, t['hrs']))
-    xdata = np.concatenate((xdata, t['hrs']))
-    xdata = np.concatenate((xdata, t['hrs']))
-    xdata = np.concatenate((xdata, t['hrs']))
-
     for k,df in df_dict.items():
         npdf = np.array(df)
         ydata = npdf[:,0]
-        ydata = np.concatenate((ydata, npdf[:,1]))
-        ydata = np.concatenate((ydata, npdf[:,2]))
-        ydata = np.concatenate((ydata, npdf[:,3]))
-        ydata = np.concatenate((ydata, npdf[:,4]))
-        ydata = np.concatenate((ydata, npdf[:,5]))
+        xdata = t['hrs']
+        for i in range(1,npdf.shape[1]):
+            ydata = np.concatenate((ydata, npdf[:,i]))
+            xdata = np.concatenate((xdata, t['hrs']))
+        #ydata = np.concatenate((ydata, npdf[:,2]))
+        #ydata = np.concatenate((ydata, npdf[:,3]))
+        #ydata = np.concatenate((ydata, npdf[:,4]))
+        #ydata = np.concatenate((ydata, npdf[:,5]))
         def av(l):
             return sum(l)/len(l)
-        yav = np.array([av([npdf[i,k] for k in range(6)]) for i in range(len(npdf))]) 
+        yav = np.array([av([npdf[i,k] for k in range(npdf.shape[1])]) for i in range(len(npdf))]) 
         #['avg']
         #print(xdata)
         #print(ydata)
