@@ -46,7 +46,7 @@ def process_excel(filename, specified_series):
 
     df_dict = {}
     for sample, series in zip(samples, series_names):
-        if len(specified_series) > 0 and series in specified_series:
+        if specified_series is None or (len(specified_series) > 0 and series in specified_series):
             df_dict[series] = df_kinetic_total.loc[:,sample].astype(float)
 
     return df_dict, df_kinetic_total
