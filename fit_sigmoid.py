@@ -2,12 +2,20 @@ from scipy.optimize import curve_fit
 from math import log
 from scipy import stats
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
+import argparse
 
-# sys.argv => filename
-def process_excel(filename):
+#font = {'family' : 'normal',
+#    'weight' : 'bold',
+#    'size'   : 24}
+
+#matplotlib.rc('font', **font)
+plt.style.use('seaborn-talk')
+
+def process_excel(filename, specified_series):
     df_kinetic_total = pd.read_excel(filename, sheet_name = 'Data')
 
     def get_hrs(time_str):
@@ -34,13 +42,14 @@ def process_excel(filename):
 
     samples = []
     for series in series_names:
-        samples.append(df_samples.loc[series].tolist()[0].split(','))
+        samples.append(map(lambda it: it.strip(), df_samples.loc[series].tolist()[0].split(',')))
 
-    dfs = []
-    for sample in samples:
-        dfs.append(df_kinetic_total.loc[:,sample])
+    df_dict = {}
+    for sample, series in zip(samples, series_names):
+        if len(specified_series) > 0 and series in specified_series:
+            df_dict[series] = df_kinetic_total.loc[:,sample]
 
-    return dfs, df_kinetic_total
+    return df_dict, df_kinetic_total
     #data_dfs = []
     #for sample_df, series in zip(dfs, series_names):
     #    df = pd.DataFrame()
@@ -53,7 +62,12 @@ def process_excel(filename):
     
 
 if __name__ == '__main__':
-    dfs, t = process_excel(sys.argv[1])
+    parser = argparse.ArgumentParser(description="Break down an Excel file into collections of data series for later plotting in R")
+    parser.add_argument('filename', type=str, nargs=1, help="The Excel file to be processed")
+    parser.add_argument('--series', type=str, nargs='+', help="The series from the Excel file, as named in the Layout tab, to be plotted")
+    parser.add_argument('--no_individuals', action='store_const', const=True, help="Specify --no_individuals if you don't want to plot each individual trial")
+    args = parser.parse_args()
+    df_dict, t = process_excel(filename=args.filename[0], specified_series=args.series)
 
     def f(x, L, k, x0):
         return L/(1+np.exp(-k*(x-x0)))
@@ -65,25 +79,31 @@ if __name__ == '__main__':
     xdata = np.concatenate((xdata, t['hrs']))
     xdata = np.concatenate((xdata, t['hrs']))
 
-    ydata = np.array(dfs[0])[:,0]
-    ydata = np.concatenate((ydata, np.array(dfs[0])[:,1]))
-    ydata = np.concatenate((ydata, np.array(dfs[0])[:,2]))
-    ydata = np.concatenate((ydata, np.array(dfs[0])[:,3]))
-    ydata = np.concatenate((ydata, np.array(dfs[0])[:,4]))
-    ydata = np.concatenate((ydata, np.array(dfs[0])[:,5]))
-    def av(l):
-        return sum(l)/len(l)
-    yav = np.array([av([np.array(dfs[0])[i,k] for k in range(6)]) for i in range(len(np.array(dfs[0])))]) 
-    #['avg']
-    print(xdata)
-    print(ydata)
-    
-    params, pcov = curve_fit(f, xdata, ydata)
-    print(params)
-    plt.scatter(xdata, ydata, alpha=0.3, s=4)
-    plt.scatter(t['hrs'], yav, alpha=0.8, s=4, c='black')
-    xdp = sorted(xdata)
-    plt.plot(xdp, f(xdp, *params), label="fit")
+    for k,df in df_dict.items():
+        npdf = np.array(df)
+        ydata = npdf[:,0]
+        ydata = np.concatenate((ydata, npdf[:,1]))
+        ydata = np.concatenate((ydata, npdf[:,2]))
+        ydata = np.concatenate((ydata, npdf[:,3]))
+        ydata = np.concatenate((ydata, npdf[:,4]))
+        ydata = np.concatenate((ydata, npdf[:,5]))
+        def av(l):
+            return sum(l)/len(l)
+        yav = np.array([av([npdf[i,k] for k in range(6)]) for i in range(len(npdf))]) 
+        #['avg']
+        #print(xdata)
+        #print(ydata)
+        
+        params, pcov = curve_fit(f, xdata, ydata)
+        print(k, params)
+        if args.no_individuals:
+            plt.scatter(t['hrs'], yav, alpha=0.8, s=4, label=k)
+        else:
+            plt.scatter(t['hrs'], yav, alpha=0.8, s=4, c='black', label=k)
+            plt.scatter(xdata, ydata, alpha=0.3, s=4)
+        xdp = sorted(xdata)
+        plt.plot(xdp, f(xdp, *params), label="{}_fit".format(k))
+
     plt.legend()
-    plt.show()
+    plt.savefig('plot.png')
 
