@@ -94,17 +94,24 @@ if __name__ == '__main__':
         #print(ydata)
         
         params, pcov = curve_fit(f, xdata, ydata)
-        final_proto_df.append({'tag': k, 'seq': k.split('_')[0], 'cond': k.split('_')[1], 'odmax': params[0], 'midpt': params[2]})
+        final_proto_df.append({'tag': k, 'seq': k.split('_')[0], 'cond': k.split('_')[1], 'odmax': params[0], 'midpt': params[2], 'maxslope': (params[0]*params[1])/4, 'doubling': np.log(2)/params[1] })
 
         print(k, params)
     finaldf = pd.DataFrame.from_dict(final_proto_df)
 
+    plt.clf()
     sns.lmplot(x='odmax', y='midpt',data=finaldf, fit_reg=False, hue='seq', legend='True')
-    plt.savefig('plot_params_byseq.png')
+    plt.savefig('plot_odmax_v_midpt_byseq.svg')
+    plt.clf()
+    sns.lmplot(x='odmax', y='doubling',data=finaldf, fit_reg=False, hue='seq', legend='True')
+    plt.savefig('plot_odmax_v_doubling_byseq.svg')
     #plt.scatter(odmax_CS, midpt_CS, c='b')
     #plt.scatter(odmax_C, midpt_C, c='g')
     plt.clf()
     sns.lmplot(x='odmax', y='midpt',data=finaldf, fit_reg=False, hue='cond', legend='True')
-    plt.savefig('plot_params_bycond.png')
+    plt.savefig('plot_odmax_v_midpt_bycond.svg')
+    plt.clf()
+    sns.lmplot(x='odmax', y='doubling',data=finaldf, fit_reg=False, hue='cond', legend='True')
+    plt.savefig('plot_odmax_v_doubling_bycond.svg')
 
 
