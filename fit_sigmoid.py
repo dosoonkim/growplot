@@ -4,6 +4,7 @@ from scipy import stats
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+plt.rcParams['svg.fonttype'] = 'none'
 import pandas as pd
 import sys
 import argparse
