@@ -4,6 +4,7 @@ from scipy import stats
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse, Rectangle
 plt.rcParams['svg.fonttype'] = 'none'
 import seaborn as sns
 import pandas as pd
@@ -44,7 +45,7 @@ def process_excel(filename, specified_series):
 
     samples = []
     for series in series_names:
-        samples.append(map(lambda it: it.strip(), df_samples.loc[series].tolist()[0].split(',')))
+        samples.append(filter(lambda it: it != '', map(lambda it: it.strip(), df_samples.loc[series].tolist()[0].split(','))))
 
     df_dict = {}
     for sample, series in zip(samples, series_names):
@@ -94,9 +95,13 @@ if __name__ == '__main__':
         #print(ydata)
         
         params, pcov = curve_fit(f, xdata, ydata)
-        final_proto_df.append({'tag': k, 'seq': k.split('_')[0], 'cond': k.split('_')[1], 'odmax': params[0], 'midpt': params[2], 'maxslope': (params[0]*params[1])/4, 'doubling': np.log(2)/params[1] })
+        if '_' in k:
+            final_proto_df.append({'tag': k, 'seq': k.split('_')[0], 'cond': k.split('_')[1], 'odmax': params[0], 'midpt': params[2], 'maxslope': (params[0]*params[1])/4, 'doubling': np.log(2)/params[1], 'cov': pcov })
+        else:    
+            final_proto_df.append({'tag': k, 'seq': k, 'cond': 'n/a', 'odmax': params[0], 'midpt': params[2], 'maxslope': (params[0]*params[1])/4, 'doubling': np.log(2)/params[1], 'cov': pcov })
 
-        print(k, params)
+        print(k, params, pcov)
+
     finaldf = pd.DataFrame.from_dict(final_proto_df)
 
     plt.clf()
