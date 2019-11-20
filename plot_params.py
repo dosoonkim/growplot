@@ -107,16 +107,23 @@ if __name__ == '__main__':
         for name, param, stdev in zip(["Max", "K-param", "Midpoint"], params, stdevs):
             print("{}: {} +/- {}".format(name, param, stdev))
         # lag_time = (mx0 - y0) / m = x0 - y0/m
+
+        # Assuming covariances are close enough to zero.
+
         half_max = params[0]/2
         half_max_sd = stdevs[0]/2
+
         max_slope = (params[0]*params[1])/4
         max_slope_sd = ( (stdevs[0]**2 * stdevs[1]**2 + stdevs[0]**2 * params[0]**2 + stdevs[1]**2 * params[1]**2  )**0.5 ) / 4
-        lag_time = params[2] - half_max / max_slope
-        #print("variance odmax", stdevs[0]**2)
-        #print("variance par1", stdevs[1]**2)
-        #print("variance midpt", stdevs[2]**2)
-        #lag_time_sd = ( stdevs[2]**2 + ( half_max_sd**2 / ( (stdevs[0]**2 * stdevs[1]**2 + stdevs[0]**2 * params[0]**2 + stdevs[1]**2 * params[1]**2  ) )/16 )  ) ** 0.5
-        lag_time_sd = ( stdevs[2]**2 + ( half_max_sd**2 / max_slope_sd**2 ) ) ** 0.5 
+        
+        half_max_over_max_slope = half_max / max_slope
+        # minimal consideration of covariance would append -2cov(x,y)/xy to the second term
+        half_max_over_max_slope_sd = ( half_max**2 / max_slope**2 * ( half_max_sd**2 / half_max**2 + max_slope_sd**2/max_slope**2 ) )**0.5
+
+        lag_time = params[2] - half_max_over_max_slope
+        # minimal consideration of covariance would subtract -2cov(x,y) inside the sqrt
+        lag_time_sd = ( stdevs[2]**2 + half_max_over_max_slope_sd**2 ) ** 0.5
+        
         print("Max slope: {} +/- {}".format(max_slope, max_slope_sd))
         print("Lag time: {} +/- {}".format(lag_time, lag_time_sd))
     
