@@ -100,8 +100,26 @@ if __name__ == '__main__':
         else:    
             final_proto_df.append({'tag': k, 'seq': k, 'cond': 'n/a', 'odmax': params[0], 'midpt': params[2], 'maxslope': (params[0]*params[1])/4, 'doubling': np.log(2)/params[1], 'cov': pcov })
 
-        print(k, params, pcov)
+        #print(k, params, pcov)
 
+        stdevs = np.sqrt(np.diag(pcov))
+        print(k)
+        for name, param, stdev in zip(["Max", "K-param", "Midpoint"], params, stdevs):
+            print("{}: {} +/- {}".format(name, param, stdev))
+        # lag_time = (mx0 - y0) / m = x0 - y0/m
+        half_max = params[0]/2
+        half_max_sd = stdevs[0]/2
+        max_slope = (params[0]*params[1])/4
+        max_slope_sd = ( (stdevs[0]**2 * stdevs[1]**2 + stdevs[0]**2 * params[0]**2 + stdevs[1]**2 * params[1]**2  )**0.5 ) / 4
+        lag_time = params[2] - half_max / max_slope
+        #print("variance odmax", stdevs[0]**2)
+        #print("variance par1", stdevs[1]**2)
+        #print("variance midpt", stdevs[2]**2)
+        #lag_time_sd = ( stdevs[2]**2 + ( half_max_sd**2 / ( (stdevs[0]**2 * stdevs[1]**2 + stdevs[0]**2 * params[0]**2 + stdevs[1]**2 * params[1]**2  ) )/16 )  ) ** 0.5
+        lag_time_sd = ( stdevs[2]**2 + ( half_max_sd**2 / max_slope_sd**2 ) ) ** 0.5 
+        print("Max slope: {} +/- {}".format(max_slope, max_slope_sd))
+        print("Lag time: {} +/- {}".format(lag_time, lag_time_sd))
+    
     finaldf = pd.DataFrame.from_dict(final_proto_df)
 
     plt.clf()
